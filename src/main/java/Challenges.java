@@ -1,6 +1,10 @@
 /* (C)2024 */
-import java.util.Collections;
-import java.util.List;
+
+import java.math.BigInteger;
+import java.sql.Array;
+import java.sql.SQLOutput;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /* (C)2024 */
 public class Challenges {
@@ -21,9 +25,12 @@ public class Challenges {
 
     public String readableTime(Integer seconds) {
         // YOUR CODE HERE...
-        return "";
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        int remainSeconds = seconds % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, remainSeconds);
     }
-    ;
 
     /* *****
     Challenge 2
@@ -42,12 +49,24 @@ public class Challenges {
     Invoking "circularArray(2)" should return "["Island", "Japan", "Israel", "Germany", "Norway"]"
     ***** */
 
-    public String[] circularArray(int index) {
+    public String[] circularArray(int index) { // test passed
         String[] COUNTRY_NAMES = {"Germany", "Norway", "Island", "Japan", "Israel"};
         // YOUR CODE HERE...
-        return COUNTRY_NAMES;
+        if (index < 0) {
+            System.out.println("Invalid index number");
+            return COUNTRY_NAMES;
+        }
+        int arrayLength = COUNTRY_NAMES.length;
+        int greaterIndex = index % arrayLength;
+
+        // New List to store my array organized
+        List<String> newArray = new ArrayList<>();
+
+        newArray.addAll(Arrays.asList(COUNTRY_NAMES).subList(greaterIndex, arrayLength));
+        newArray.addAll(Arrays.asList(COUNTRY_NAMES).subList(0, greaterIndex));
+
+        return newArray.toArray(new String[0]);
     }
-    ;
 
     /* *****
     Challenge 3
@@ -66,14 +85,31 @@ public class Challenges {
 
     Invoking "ownPower(10, 3)" should return "317"
     because 1^1 + 2^2 + 3^3 + 4^4 + 5^5 + 6^6 + 7^7 + 8^8 + 9^9 + 10^10 = 10405071317
+                                                                          2147483647
     The last 3 digits for the sum of powers from 1 to 10 is "317"
     ***** */
 
     public String ownPower(int number, int lastDigits) {
         // YOUR CODE HERE...
-        return "";
+        BigInteger sum = BigInteger.ZERO;
+
+        for (int i = 1; i <= number; i++) {
+            BigInteger myValue = BigInteger.valueOf(i);
+            BigInteger power = myValue.pow(i);
+            sum = sum.add(power);
+        }
+
+        // I tried to pass use mod, but mathematically the last test was deleting the 0 at the left, so I chose to cast to string
+//        BigInteger baseNum = BigInteger.TEN;
+//        BigInteger powValue = baseNum.pow(lastDigits);
+        //BigInteger mod = sum.mod(powValue); // last digits
+
+        // Getting last digits
+        String myNum = sum.toString();
+        int beginIndex = myNum.length() - lastDigits;
+
+        return myNum.substring(beginIndex); //mod.toString();
     }
-    ;
 
     /* *****
     Challenge 4
@@ -94,7 +130,27 @@ public class Challenges {
 
     public Integer digitSum(int n) {
         // YOUR CODE HERE...
-        return 1;
+        BigInteger resultFact = BigInteger.ONE;
+        if(n <= 1){
+            return 1;
+        }
+        for(int i = 1; i <= n; i++){
+            BigInteger iBig = BigInteger.valueOf(i);
+            resultFact = resultFact.multiply(iBig);
+        }
+
+        //sum = n * digitSum(n - 1); // x! * (x - 1)
+
+        int sum = 0;
+        String myNumber = resultFact.toString();
+        List<Integer> listToSum = myNumber.chars()
+                .map(Character::getNumericValue)
+                .boxed().toList();
+
+        for(Integer l : listToSum){
+            sum += l;
+        }
+        return sum;
     }
 
     /**
@@ -106,9 +162,22 @@ public class Challenges {
      *
      * @param ascivalues  hand, player2 hand
      */
-    public String decrypt(List<Integer> ascivalues) {
+    public String decrypt(List<Integer> ascivalues) { // test passed
         // YOUR CODE HERE...
-        return "";
+        StringBuilder finalString = new StringBuilder();
+        List<Integer> thisIndex = new ArrayList<>(Collections.singletonList(ascivalues.getFirst()));
+
+        for(int i = 1; i < ascivalues.size(); i++) {
+            int calculate = ascivalues.get(i) + thisIndex.get(i - 1);
+            thisIndex.add(calculate);
+        }
+
+        for(int c : thisIndex){
+            char myChar = (char) c;
+            finalString.append(myChar);
+        }
+
+        return finalString.toString();
     }
 
     /**
@@ -122,6 +191,17 @@ public class Challenges {
      */
     public List<Integer> encrypt(String text) {
         // YOUR CODE HERE...
-        return Collections.emptyList();
+        List<Integer> myListChars = new ArrayList<>();
+        for(int c : text.toCharArray()){
+            myListChars.add(c);
+        }
+        List<Integer> thisIndex = new ArrayList<>(Collections.singletonList(myListChars.getFirst()));
+
+        for(int i = 1; i < myListChars.size(); i++) {
+            int calculate = myListChars.get(i) - myListChars.get(i - 1);
+            thisIndex.add(calculate);
+        }
+
+        return thisIndex;
     }
 }
